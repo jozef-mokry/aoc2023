@@ -1,14 +1,13 @@
-use std::io::BufRead;
-
 pub fn solve() {
-    // part1();
-    part2();
+    let input = std::fs::read_to_string("data/1.txt").unwrap();
+    println!("-----Day 1----");
+    part1(&input);
+    part2(&input);
 }
 
-fn part1() {
+fn part1(input: &str) {
     let mut ans: usize = 0;
-    for line in std::io::stdin().lock().lines() {
-        let line = line.unwrap();
+    for line in input.lines() {
         let mut line = line.as_bytes().into_iter();
         let a = line.find(|&c| c.is_ascii_digit()).unwrap();
         let b = line.rfind(|&c| c.is_ascii_digit()).unwrap_or(&a);
@@ -17,14 +16,13 @@ fn part1() {
     println!("Part 1: {ans}");
 }
 
-fn part2() {
+fn part2(input: &str) {
     let mut ans: usize = 0;
     let numbers = [
         "0", "zero", "1", "one", "2", "two", "3", "three", "4", "four", "5", "five", "6", "six",
         "7", "seven", "8", "eight", "9", "nine",
     ];
-    for line in std::io::stdin().lock().lines() {
-        let line = line.unwrap();
+    for line in input.lines() {
         let mut a = None;
         let mut b = None;
         for i in 0..numbers.len() {
