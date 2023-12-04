@@ -27,6 +27,7 @@ pub fn solve() {
         if count > 0 {
             ans += 1 << (count - 1);
         }
+        // should have checked the indices here, but it worked anyway
         for v in &mut card_counts[i + 1..=i + count] {
             *v += curr_count;
         }
