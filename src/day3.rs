@@ -1,4 +1,3 @@
-use std::io::BufRead;
 pub fn solve() {
     let input = std::fs::read_to_string("data/3.txt").unwrap();
     println!("----Day 3:----");
