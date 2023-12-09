@@ -1,8 +1,9 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 pub fn solve() {
     let input = std::fs::read_to_string("data/8.txt").unwrap();
     println!("---Day 8---");
     let mut lines = input.lines();
+    let instr_count = lines.clone().next().unwrap().len();
     let mut instrs = lines
         .next()
         .unwrap()
@@ -58,7 +59,13 @@ pub fn solve() {
         // it turns out that cycle length is the same as time to reach xxxZ node
         // Also, each ghost visits only one Z node on its path. If these assumptions were not true,
         // than more work would be needed.
-        let (_, cycle) = get_path_info(start_nodes[i], instrs_part2.clone(), &graph, &ends_with_z);
+        let (_, cycle) = get_path_info(
+            start_nodes[i],
+            instrs_part2.clone(),
+            instr_count,
+            &graph,
+            &ends_with_z,
+        );
         global_steps_to_z = global_steps_to_z * cycle / gcd(global_steps_to_z, cycle);
     }
     println!("Part 2: {global_steps_to_z}");
@@ -75,10 +82,11 @@ fn gcd(a: usize, b: usize) -> usize {
 fn get_path_info<'a>(
     mut curr: usize,
     mut instrs: impl Iterator<Item = (usize, usize)>,
+    instr_count: usize,
     graph: &[[usize; 2]],
     ends_with_z: &[bool],
 ) -> (usize, usize) {
-    let mut seen = HashMap::new();
+    let mut seen = vec![None; graph.len() * instr_count];
     let mut time_to_z = 0;
     let mut steps = 0;
 
@@ -86,11 +94,11 @@ fn get_path_info<'a>(
         let (instr_idx, instr) = instrs.next().unwrap();
         curr = graph[curr][instr];
         steps += 1;
-        if let Some(prev_steps) = seen.get(&(instr_idx, curr)) {
+        if let Some(prev_steps) = seen[instr_idx * graph.len() + curr] {
             let cycle_len = steps - prev_steps;
             return (time_to_z, cycle_len);
         } else {
-            seen.insert((instr_idx, curr), steps);
+            seen[instr_idx * graph.len() + curr] = Some(steps);
         }
 
         if ends_with_z[curr] {
