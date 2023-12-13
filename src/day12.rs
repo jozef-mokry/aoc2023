@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use rustc_hash::FxHashMap;
 
 pub fn solve() {
     println!("---Day 12---");
@@ -6,6 +6,7 @@ pub fn solve() {
 
     let mut ans = 0;
     let mut ans2 = 0;
+    let mut mem = Mem::default();
     for line in input.lines() {
         let (symbols, counts) = line.split_once(' ').unwrap();
         let mut counts: Vec<_> = counts
@@ -13,7 +14,8 @@ pub fn solve() {
             .map(|v| v.parse::<usize>().unwrap())
             .collect();
         let ranges = parse_symbols(symbols);
-        ans += process(&mut counts[..], &ranges[..], &mut Mem::default());
+        ans += process(&mut counts[..], &ranges[..], &mut mem);
+        mem.clear();
 
         // Part 2
         let new_counts_len = counts.len() * 5;
@@ -21,7 +23,8 @@ pub fn solve() {
         let mut symbols = (symbols.to_owned() + "?").repeat(5);
         symbols.pop();
         let new_ranges = parse_symbols(&symbols);
-        ans2 += process(&mut counts[..], &new_ranges[..], &mut Mem::default());
+        ans2 += process(&mut counts[..], &new_ranges[..], &mut mem);
+        mem.clear();
     }
     println!("Part 1: {ans}");
     println!("Part 2: {ans2}");
@@ -29,8 +32,15 @@ pub fn solve() {
 
 #[derive(Default)]
 struct Mem {
-    known: HashMap<(usize, usize, Option<usize>), usize>,
-    unknown: HashMap<(usize, usize, Option<usize>, usize, bool), usize>,
+    known: FxHashMap<(usize, usize, Option<usize>), usize>,
+    unknown: FxHashMap<(usize, usize, Option<usize>, usize, bool), usize>,
+}
+
+impl Mem {
+    fn clear(&mut self) {
+        self.known.clear();
+        self.unknown.clear();
+    }
 }
 
 fn process(counts: &mut [usize], ranges: &[Range], mem: &mut Mem) -> usize {
