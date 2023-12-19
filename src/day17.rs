@@ -66,9 +66,9 @@ fn min_dist(grid: &[&[u8]], min_steps: usize, max_steps: usize) -> usize {
 fn dir_id(dir: (isize, isize)) -> u8 {
     match dir {
         dir if dir == UP => 1,
-        dir if dir == DOWN => 2,
-        dir if dir == LEFT => 4,
-        dir if dir == RIGHT => 8,
+        dir if dir == DOWN => 1,
+        dir if dir == LEFT => 2,
+        dir if dir == RIGHT => 2,
         _ => panic!(),
     }
 }
