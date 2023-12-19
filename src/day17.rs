@@ -16,66 +16,52 @@ pub fn solve() {
 }
 
 fn min_dist(grid: &[&[u8]], min_steps: usize, max_steps: usize) -> usize {
-    let mut seen = vec![vec![0; grid.len() * grid[0].len()]; max_steps];
+    let mut seen = vec![0; grid.len() * grid[0].len()];
     let n_col = grid[0].len();
 
-    let mut queue: BinaryHeap<(
-        std::cmp::Reverse<usize>,
-        isize,
-        isize,
-        ((isize, isize), usize),
-    )> = BinaryHeap::new();
-    queue.push((std::cmp::Reverse(0), 0, 1, (RIGHT, 1)));
-    queue.push((std::cmp::Reverse(0), 1, 0, (DOWN, 1)));
+    let mut queue: BinaryHeap<(std::cmp::Reverse<usize>, isize, isize, (isize, isize))> =
+        Default::default();
+    queue.push((std::cmp::Reverse(0), 0, 0, RIGHT));
+    queue.push((std::cmp::Reverse(0), 0, 0, DOWN));
 
-    while let Some((std::cmp::Reverse(score), row, col, (dir, step_count))) = queue.pop() {
+    while let Some((std::cmp::Reverse(score), row, col, dir)) = queue.pop() {
         let dir_id = dir_id(dir);
-        if step_count == max_steps + 1
-            || row as usize >= grid.len()
+        if row as usize >= grid.len()
             || row < 0
             || col as usize >= grid[0].len()
             || col < 0
-            || seen[step_count - 1][row as usize * n_col + col as usize] & dir_id != 0
+            || seen[row as usize * n_col + col as usize] & dir_id != 0
         {
             continue;
         }
 
-        let new_score =
-            std::cmp::Reverse(score + (grid[row as usize][col as usize] - b'0') as usize);
-
-        if step_count >= min_steps
-            && row as usize + 1 == grid.len()
-            && col as usize + 1 == grid[0].len()
-        {
-            return new_score.0;
+        if row as usize + 1 == grid.len() && col as usize + 1 == grid[0].len() {
+            return score;
         }
 
-        seen[step_count - 1][row as usize * n_col + col as usize] |= dir_id;
+        seen[row as usize * n_col + col as usize] |= dir_id;
 
         let (row_dir, col_dir) = dir;
 
-        queue.push((
-            new_score,
-            row + row_dir,
-            col + col_dir,
-            (dir, step_count + 1),
-        ));
-        if step_count >= min_steps {
-            queue.push((
-                new_score,
-                row + col_dir,
-                col + row_dir,
-                ((col_dir, row_dir), 1),
-            ));
-            queue.push((
-                new_score,
-                row - col_dir,
-                col - row_dir,
-                ((-col_dir, -row_dir), 1),
-            ));
+        for new_dir in [(col_dir, row_dir), (-col_dir, -row_dir)] {
+            let mut new_score = score;
+            let mut row = row;
+            let mut col = col;
+            for steps in 1..=max_steps {
+                row += new_dir.0;
+                col += new_dir.1;
+                if let Some(val) = grid.get(row as usize).and_then(|row| row.get(col as usize)) {
+                    new_score += (val - b'0') as usize;
+                    if steps >= min_steps {
+                        queue.push((std::cmp::Reverse(new_score), row, col, new_dir));
+                    }
+                } else {
+                    break;
+                }
+            }
         }
     }
-    panic!()
+    panic!("Solution not found")
 }
 fn dir_id(dir: (isize, isize)) -> u8 {
     match dir {
